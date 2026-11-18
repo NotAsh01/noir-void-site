@@ -7,7 +7,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-API_VERSION = "v25.0"
+API_VERSION = "v27.0"
 API_ROOT = f"https://graph.facebook.com/{API_VERSION}"
 QUEUE_PATH = Path("queue.json")
 
