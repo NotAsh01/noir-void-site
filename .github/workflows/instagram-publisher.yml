@@ -1,0 +1,65 @@
+name: Instagram Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      media_url:
+        description: Public HTTPS URL of a JPEG image or MP4 video
+        required: true
+        type: string
+      caption:
+        description: Instagram caption
+        required: true
+        type: string
+      media_type:
+        description: Choose IMAGE for a photo or REELS for an MP4 video
+        required: true
+        type: choice
+        options:
+          - IMAGE
+          - REELS
+  schedule:
+    # Daily at 19:00 India time. Publishes the next item in queue.json.
+    - cron: "30 13 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out publishing queue
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Publish to Instagram
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          MEDIA_URL: ${{ inputs.media_url }}
+          CAPTION: ${{ inputs.caption }}
+          MEDIA_TYPE: ${{ inputs.media_type }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: python scripts/publish_instagram.py
+
+      - name: Save updated queue
+        if: github.event_name == 'schedule' && success()
+        run: |
+          if ! git diff --quiet -- queue.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add queue.json
+            git commit -m "chore: advance Instagram publishing queue"
+            git push
+          fi
