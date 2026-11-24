@@ -2,6 +2,8 @@
 
 <img src="assets/profile-banner.svg" width="100%" alt="NOIR // VOID project banner" />
 
+<img src="noir-void-emblem.svg" width="104" alt="NOIR // VOID emblem" />
+
 # NOIR // VOID
 
 **Quiet confidence. Unfiltered perspective. No noise.**
